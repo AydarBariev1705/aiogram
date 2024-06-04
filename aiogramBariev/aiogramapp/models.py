@@ -7,7 +7,7 @@ def images_directory_path(instance: 'Product', filename: str) -> str:
     """
     Путь для загрузки изображения через кастомную функцию
 
-    :param instance: ProductImage
+    :param instance: Product
     :param filename: str
     :return: str
     """
@@ -79,7 +79,7 @@ class Product(models.Model):
         null=False,
         blank=False,
     )
-    Description = models.TextField(
+    description = models.TextField(
         null=False,
         blank=True,
     )
@@ -105,3 +105,35 @@ class Product(models.Model):
         blank=True,
         upload_to=images_directory_path,
     )
+
+
+class Tguser(models.Model):
+    """
+    Модель пользователя
+    """
+    tg_id = models.BigIntegerField(
+        null=False,
+    )
+
+
+class Basket(models.Model):
+    """
+    Модель корзины
+    """
+    tg_user = models.ForeignKey(
+        Tguser,
+        default=1,
+        null=False,
+        on_delete=models.PROTECT
+    )
+
+    product = models.ForeignKey(
+        Product,
+        related_name='products',
+        on_delete=models.PROTECT)
+
+    count = models.IntegerField(
+        default=1,
+        null=False,
+    )
+

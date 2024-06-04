@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()  # Извлекаем переменные окружения из файла .env
 
 TOKEN = os.environ.get("TOKEN")
+CHAT_ID = os.environ.get("CHAT_ID")
+ADMIN_ID = [int(os.environ.get("ADMIN_ID_1")),]
 
 # PostgresSQL
 DB_HOST = os.environ.get("DB_HOST")

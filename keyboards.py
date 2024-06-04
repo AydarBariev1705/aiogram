@@ -1,16 +1,65 @@
-# from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-#
-# inline_btn_1 = InlineKeyboardButton('Первая кнопка!', callback_data='button1')
-# inline_kb1 = InlineKeyboardMarkup().add(inline_btn_1)
-#
-# inline_kb_full = InlineKeyboardMarkup(row_width=2).add(inline_btn_1)
-# inline_kb_full.add(InlineKeyboardButton('Вторая кнопка', callback_data='btn2'))
-# inline_btn_3 = InlineKeyboardButton('кнопка 3', callback_data='btn3')
-# inline_btn_4 = InlineKeyboardButton('кнопка 4', callback_data='btn4')
-# inline_btn_5 = InlineKeyboardButton('кнопка 5', callback_data='btn5')
-# inline_kb_full.add(inline_btn_3, inline_btn_4, inline_btn_5)
-# inline_kb_full.row(inline_btn_3, inline_btn_4, inline_btn_5)
-# inline_kb_full.insert(InlineKeyboardButton("query=''", switch_inline_query=''))
-# inline_kb_full.insert(InlineKeyboardButton("query='qwerty'", switch_inline_query='qwerty'))
-# inline_kb_full.insert(InlineKeyboardButton("Inline в этом же чате", switch_inline_query_current_chat='wasd'))
-# inline_kb_full.add(InlineKeyboardButton('Уроки aiogram', url='https://surik00.gitbooks.io/aiogram-lessons/content/'))
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from utils import get_categories, get_subcategories, get_products
+
+
+def main_keyboard():
+    buttons = [
+        [
+            InlineKeyboardButton(text="Categories", callback_data="bot_categories"),
+            InlineKeyboardButton(text="Cart", callback_data="bot_cart")
+        ],
+        [InlineKeyboardButton(text="FAQ", callback_data="bot_faq")]
+    ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return keyboard
+
+
+to_main = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text='To main menu',
+                callback_data='to_main'
+            )
+        ]
+    ]
+)
+
+
+async def categories_keyboard():
+    categories = await get_categories()
+    keyboard = InlineKeyboardBuilder()
+    for category in categories:
+        keyboard.add(
+            InlineKeyboardButton(
+                text=f"{category.title}",
+                callback_data=f"category_{category.id}")
+        )
+
+    return keyboard.adjust(2).as_markup()
+
+
+async def subcategories_keyboard(cat_id: int):
+    subcategories = await get_subcategories(cat_id)
+    keyboard = InlineKeyboardBuilder()
+    for subcategory in subcategories:
+        keyboard.add(
+            InlineKeyboardButton(
+                text=f"{subcategory.title}",
+                callback_data=f"subcategory_{subcategory.id}")
+        )
+
+    return keyboard.adjust(2).as_markup()
+
+
+async def products_keyboard(subcat_id: int):
+    products = await get_products(subcat_id)
+    keyboard = InlineKeyboardBuilder()
+    for product in products:
+        keyboard.add(
+            InlineKeyboardButton(
+                text=f"{product.title}\n {product.description}",
+                callback_data=f"subcategory_{product.id}")
+        )
+    return keyboard.adjust(1).as_markup()
