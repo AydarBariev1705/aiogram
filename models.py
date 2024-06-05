@@ -98,9 +98,8 @@ class Basket(Base):
         autoincrement=True,
         index=True,
     )
-    tg_user_id: Mapped[int] = mapped_column(
-        ForeignKey("aiogramapp_tguser.id")
-    )
+    tg_id: Mapped[int] = mapped_column(
+        Integer)
     product_id: Mapped[int] = mapped_column(
         ForeignKey("aiogramapp_product.id")
     )

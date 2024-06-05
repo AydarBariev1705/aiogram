@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from utils import get_categories, get_subcategories, get_products, get_product
+from utils import get_categories, get_subcategories, get_products, get_product, get_cart
 
 
 # from utils import get_categories, get_subcategories, get_products
@@ -81,3 +81,28 @@ async def product_keyboard(prod_id: int):
     )
 
     return keyboard.adjust(1).as_markup(), product
+
+
+async def cart_keyboard():
+    buttons = [
+            [
+                InlineKeyboardButton(text="Checkout", callback_data="checkout"),
+                InlineKeyboardButton(text="Delete product from cart", callback_data="delete_products")
+            ],
+
+        ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return keyboard
+    # cart = await get_cart(tg_id)
+    #     cart_dict = {}
+    #     if cart:
+    #         keyboard = InlineKeyboardBuilder()
+    #         for obj in cart:
+    #             print(obj.product_id)
+    #             print(obj.quantity)
+    #             product = await get_product(obj.product_id)
+    #             cart_dict[product.title] = {'quantity': obj.quantity, 'total_summ': obj.quantity*product.price}
+
+# async def cart_keyboard(tg_id: int):
+#
+

@@ -117,11 +117,9 @@ class Basket(models.Model):
     """
     Модель корзины
     """
-    tg_user = models.ForeignKey(
-        Tguser,
-        default=1,
+    tg_id = models.BigIntegerField(
         null=False,
-        on_delete=models.PROTECT
+        default=1,
     )
 
     product = models.ForeignKey(

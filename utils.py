@@ -1,7 +1,7 @@
 from aiogram.types import Message
 
 from database import async_session
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from models import Category, Subcategory, Product, Tguser, Basket
 
 
@@ -53,3 +53,34 @@ async def get_product(prod_id: int):
     async with async_session() as session:
         product = await session.scalar(select(Product).where(Product.id == prod_id))
     return product
+
+
+async def set_or_create_basket(tg_id: int, product_id: int, quantity: int):
+    async with async_session() as session:
+        basket = await session.scalar(select(Basket).where(
+            Basket.tg_id == tg_id).where(
+            Basket.product_id == product_id,
+        ),
+        )
+        if not basket:
+            session.add(Basket(tg_id=tg_id, product_id=product_id, quantity=quantity))
+            await session.commit()
+        else:
+            basket.quantity += quantity
+            await session.commit()
+
+
+async def get_cart(tg_id: int):
+    async with async_session() as session:
+        cart = await session.scalars(select(Basket).where(Basket.tg_id == tg_id))
+        if cart:
+            return cart
+        if not cart:
+            return None
+
+
+async def del_product(tg_id: int, product_id):
+    async with async_session() as session:
+        query = delete(Basket).where(Basket.tg_id == tg_id).where(Basket.product_id == product_id)
+        await session.execute(query)
+        await session.commit()

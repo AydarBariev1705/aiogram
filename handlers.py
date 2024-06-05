@@ -1,6 +1,7 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.markdown import text
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, FSInputFile
 from aiogram.filters import Command, CommandStart
@@ -8,8 +9,11 @@ from sqlalchemy import select
 
 from config import CHAT_ID
 from database import async_session
-from keyboards import main_keyboard, categories_keyboard, subcategories_keyboard, products_keyboard, product_keyboard
+from keyboards import main_keyboard, categories_keyboard, subcategories_keyboard, products_keyboard, product_keyboard, \
+    cart_keyboard
 from models import Product
+from utils import set_or_create_basket, get_cart, get_product, del_product
+from utils import set_user
 
 router = Router()
 
@@ -17,17 +21,21 @@ FAQ = 'FAQ'
 
 
 class HandlerState(StatesGroup):
-    product = 0
+    product: int = 0
     waiting_quantity = State()
+    tg_id: int = 0
+    cart = None
 
 
 @router.message(CommandStart())
 @router.callback_query(F.data == 'to_main')
 async def cmd_start(message: Message | CallbackQuery):
     if isinstance(message, Message):
-        # await set_user(message.from_user.id)
-
-        await message.answer("Hello!", reply_markup=main_keyboard())
+        await set_user(message.from_user.id)
+        HandlerState.tg_id = message.from_user.id
+        await message.answer("Welcome to bot!", reply_markup=main_keyboard())
+    if isinstance(message, CallbackQuery):
+        await message.message.answer("Main menu!", reply_markup=main_keyboard())
 
 
 @router.callback_query(F.data.startswith("bot_"))
@@ -36,10 +44,31 @@ async def callbacks_main(callback: CallbackQuery):
 
     if action == "categories":
         await callback.message.answer("Choose category", reply_markup=await categories_keyboard())
-
     elif action == "cart":
+        cart = await get_cart(HandlerState.tg_id)
 
-        await callback.message.answer(f"cart")
+        total_cost = 0
+        message_string = ''
+        for obj in cart:
+            product = await get_product(obj.product_id)
+            total_summ_for_product = obj.quantity * product.price
+            total_cost += total_summ_for_product
+            message_string += (f"*{product.title}*\n"
+                               f"quantity in cart: {obj.quantity}\n"
+                               f"price: {obj.quantity * product.price}\n")
+        if total_cost > 0:
+            await callback.message.answer(
+                message_string,
+                parse_mode="Markdown"
+            )
+            await callback.message.answer(
+                f"*Total cost: {total_cost}*",
+                reply_markup=await cart_keyboard(),
+                parse_mode="Markdown",
+            )
+        else:
+            await callback.message.answer('Cart is empty\n Lets start shopping!', reply_markup=main_keyboard())
+
     elif action == "faq":
         await callback.message.answer(FAQ)
 
@@ -73,7 +102,7 @@ async def callbacks_products(callback: CallbackQuery):
 
 
 @router.callback_query(F.data.startswith("product_"))
-async def callbacks_products(callback: CallbackQuery, state: FSMContext):
+async def callbacks_product(callback: CallbackQuery, state: FSMContext):
     action = callback.data.split("_")[1]
     HandlerState.product = int(action)
     await state.set_state(HandlerState.waiting_quantity)
@@ -81,34 +110,45 @@ async def callbacks_products(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(HandlerState.waiting_quantity)
-async def newsletter_message(message: Message, state: FSMContext):
-    user = message.from_user.id
-    product = HandlerState.product
-    quantity = int(message.text)
-    print('user', user,)
-    print('product', product, )
-    print('quantity', quantity)
-    await message.answer('Added to cart', reply_markup=main_keyboard())
+async def waiting_quantity(message: Message, state: FSMContext):
+    try:
+        quantity = int(message.text)
+        if quantity <= 0:
+            raise ValueError
+        user = message.from_user.id
+        product = HandlerState.product
 
-    await state.clear()
+        await set_or_create_basket(tg_id=user, product_id=product, quantity=quantity)
+        await message.answer('Added to cart', reply_markup=main_keyboard())
+        await state.clear()
+    except ValueError:
+        await message.answer('Try again! Send an integer greater than zero', )
 
-# @router.callback_query(F.data.startswith("subcategory_"))
-# async def callbacks_products(callback: CallbackQuery):
-#     action = callback.data.split("_")[1]
-#     async with async_session() as session:
-#         products = await session.scalars(select(Product).where(Product.subcategory_id == int(action)))
-#     for product in products:
-#         buttons = [
-#             [
-#                 InlineKeyboardButton(text=f"Add to basket", callback_data=f"to_basket"),
-#                 InlineKeyboardButton(text=f"To main menu", callback_data=f"to_main"),
-#             ],
-#         ]
-#         keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-#         await callback.message.answer_photo(
-#             photo=FSInputFile(path=f'aiogramBariev/{product.image}'),
-#         )
-#         await callback.message.answer(
-#             f"{product.description}\n\nprice: {product.price}",
-#             reply_markup=keyboard,
-#         )
+
+@router.callback_query(F.data == 'delete_products')
+async def callbacks_delete_product(callback: CallbackQuery):
+    cart = await get_cart(HandlerState.tg_id)
+    keyboard = InlineKeyboardBuilder()
+    for obj in cart:
+        prod = await get_product(obj.product_id)
+
+        keyboard.add(
+            InlineKeyboardButton(
+                text=f"{prod.title}",
+                callback_data=f"del_product_{prod.id}")
+        )
+
+    await callback.message.answer(
+        'Choose product to delete',
+        reply_markup=keyboard.adjust(2).as_markup(),
+    )
+
+
+@router.callback_query(F.data.startswith("del_product_"))
+async def callbacks_del_product(callback: CallbackQuery, ):
+    action = callback.data.split("_")[2]
+    await del_product(tg_id=HandlerState.tg_id, product_id=int(action))
+    await callback.message.answer("Product removed from cart!", reply_markup=main_keyboard())
+
+# @router.callback_query(F.data==)
+# async def callbacks_products(callback: CallbackQuery,):
