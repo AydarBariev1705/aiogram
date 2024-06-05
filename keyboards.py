@@ -1,8 +1,12 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from utils import get_categories, get_subcategories, get_products
+
+from utils import get_categories, get_subcategories, get_products, get_product
 
 
+# from utils import get_categories, get_subcategories, get_products
+#
+#
 def main_keyboard():
     buttons = [
         [
@@ -15,18 +19,20 @@ def main_keyboard():
     return keyboard
 
 
-to_main = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='To main menu',
-                callback_data='to_main'
-            )
-        ]
-    ]
-)
-
-
+#
+#
+# to_main = InlineKeyboardMarkup(
+#     inline_keyboard=[
+#         [
+#             InlineKeyboardButton(
+#                 text='To main menu',
+#                 callback_data='to_main'
+#             )
+#         ]
+#     ]
+# )
+#
+#
 async def categories_keyboard():
     categories = await get_categories()
     keyboard = InlineKeyboardBuilder()
@@ -59,7 +65,19 @@ async def products_keyboard(subcat_id: int):
     for product in products:
         keyboard.add(
             InlineKeyboardButton(
-                text=f"{product.title}\n {product.description}",
-                callback_data=f"subcategory_{product.id}")
+                text=f"{product.title}",
+                callback_data=f"products_{product.id}")
         )
-    return keyboard.adjust(1).as_markup()
+    return keyboard.adjust(2).as_markup()
+
+
+async def product_keyboard(prod_id: int):
+    product = await get_product(prod_id)
+    keyboard = InlineKeyboardBuilder()
+    keyboard.add(
+        InlineKeyboardButton(
+            text=f"Add to cart",
+            callback_data=f"product_{product.id}")
+    )
+
+    return keyboard.adjust(1).as_markup(), product

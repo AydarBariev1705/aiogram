@@ -47,9 +47,3 @@ async def get_products(subcat_id: int):
     async with async_session() as session:
         products = await session.scalars(select(Product).where(Product.subcategory_id == subcat_id))
     return products
-
-
-async def get_product(prod_id: int):
-    async with async_session() as session:
-        product = await session.scalar(select(Product).where(Product.id == prod_id))
-    return product

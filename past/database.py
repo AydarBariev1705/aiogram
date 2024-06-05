@@ -13,5 +13,5 @@ engine = create_async_engine(url=DATABASE_URL)
 async_session = async_sessionmaker(engine)
 
 
-class Base(AsyncAttrs, DeclarativeBase,):
+class Base(AsyncAttrs, DeclarativeBase, ):
     pass

@@ -89,10 +89,7 @@ class Product(models.Model):
         decimal_places=2,
         null=False,
     )
-    count = models.IntegerField(
-        default=1,
-        null=False,
-    )
+
     subcategory = models.ForeignKey(
         Subcategory,
         on_delete=models.SET_NULL,
@@ -132,7 +129,7 @@ class Basket(models.Model):
         related_name='products',
         on_delete=models.PROTECT)
 
-    count = models.IntegerField(
+    quantity = models.IntegerField(
         default=1,
         null=False,
     )

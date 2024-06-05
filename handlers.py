@@ -8,35 +8,26 @@ from sqlalchemy import select
 
 from config import CHAT_ID
 from database import async_session
-from keyboards import main_keyboard, categories_keyboard, subcategories_keyboard
-from models import Product, Basket
-from utils import set_user, add_to_basket
+from keyboards import main_keyboard, categories_keyboard, subcategories_keyboard, products_keyboard, product_keyboard
+from models import Product
 
 router = Router()
-FAQ = 'q1?\na1\nq2?\na2'
+
+FAQ = 'FAQ'
 
 
 class HandlerState(StatesGroup):
-    message = State()
-    waiting_count = State()
+    product = 0
+    waiting_quantity = State()
 
 
-# async def is_subscribed(message: Message):
-#     sub = await router.get_chat_member(chat_id=CHAT_ID, user_id=message.from_user.id)
 @router.message(CommandStart())
 @router.callback_query(F.data == 'to_main')
 async def cmd_start(message: Message | CallbackQuery):
     if isinstance(message, Message):
-        await set_user(message.from_user.id)
+        # await set_user(message.from_user.id)
+
         await message.answer("Hello!", reply_markup=main_keyboard())
-    else:
-        await message.message.answer("Good choice!Product added to basket!", reply_markup=main_keyboard())
-
-
-#
-# @router.callback_query(F.data == 'to_main')
-# async def to_main_menu(callback: CallbackQuery):
-#     await callback.answer("Good choice!!", reply_markup=main_keyboard())
 
 
 @router.callback_query(F.data.startswith("bot_"))
@@ -64,45 +55,60 @@ async def callbacks_subcat(callback: CallbackQuery):
 @router.callback_query(F.data.startswith("subcategory_"))
 async def callbacks_products(callback: CallbackQuery):
     action = callback.data.split("_")[1]
-    async with async_session() as session:
-        products = await session.scalars(select(Product).where(Product.subcategory_id == int(action)))
-    for product in products:
-        buttons = [
-            [
-                InlineKeyboardButton(text=f"Add to basket", callback_data=f"to_basket"),
-                InlineKeyboardButton(text=f"To main menu", callback_data=f"to_main"),
-            ],
-        ]
-        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-        await callback.message.answer_photo(
-            photo=FSInputFile(path=f'aiogramBariev/{product.image}'),
-        )
-        await callback.message.answer(
-            f"{product.description}\n\nprice: {product.price}",
-            reply_markup=keyboard,
-        )
+    await callback.message.answer("Choose product", reply_markup=await products_keyboard(int(action)))
+
+
+@router.callback_query(F.data.startswith("products_"))
+async def callbacks_products(callback: CallbackQuery):
+    action = callback.data.split("_")[1]
+    keyboard, product = await product_keyboard(int(action))
+    await callback.message.answer_photo(
+        photo=FSInputFile(
+            path=f'aiogramBariev/{product.image}',
+
+        ),
+        caption=f"{product.description}\n\nprice: {product.price}",
+        reply_markup=keyboard,
+    )
 
 
 @router.callback_query(F.data.startswith("product_"))
-async def callbacks_count(callback: CallbackQuery, state: FSMContext):
+async def callbacks_products(callback: CallbackQuery, state: FSMContext):
     action = callback.data.split("_")[1]
-    await add_to_basket(callback.from_user.id, int(action))
+    HandlerState.product = int(action)
+    await state.set_state(HandlerState.waiting_quantity)
+    await callback.message.answer('Send quantity:')
 
-    await state.set_state(HandlerState.waiting_count)
-    await callback.message.answer("Specify the quantity of the product", )
 
-
-@router.message(HandlerState.waiting_count)
+@router.message(HandlerState.waiting_quantity)
 async def newsletter_message(message: Message, state: FSMContext):
-    message.
+    user = message.from_user.id
+    product = HandlerState.product
+    quantity = int(message.text)
+    print('user', user,)
+    print('product', product, )
+    print('quantity', quantity)
+    await message.answer('Added to cart', reply_markup=main_keyboard())
 
-help_message = text(
-    "HELP",
+    await state.clear()
 
-    sep="\n"
-)
-
-
-@router.message(Command("help"))
-async def cmd_help(message: Message):
-    await message.answer(help_message)
+# @router.callback_query(F.data.startswith("subcategory_"))
+# async def callbacks_products(callback: CallbackQuery):
+#     action = callback.data.split("_")[1]
+#     async with async_session() as session:
+#         products = await session.scalars(select(Product).where(Product.subcategory_id == int(action)))
+#     for product in products:
+#         buttons = [
+#             [
+#                 InlineKeyboardButton(text=f"Add to basket", callback_data=f"to_basket"),
+#                 InlineKeyboardButton(text=f"To main menu", callback_data=f"to_main"),
+#             ],
+#         ]
+#         keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+#         await callback.message.answer_photo(
+#             photo=FSInputFile(path=f'aiogramBariev/{product.image}'),
+#         )
+#         await callback.message.answer(
+#             f"{product.description}\n\nprice: {product.price}",
+#             reply_markup=keyboard,
+#         )
