@@ -1,5 +1,7 @@
+import pandas as pd
 from aiogram.types import Message
 
+from config import EXEL_FILENAME, SHEET_NAME
 from database import async_session
 from sqlalchemy import select, delete
 from models import Category, Subcategory, Product, Tguser, Basket
@@ -84,3 +86,27 @@ async def del_product(tg_id: int, product_id):
         query = delete(Basket).where(Basket.tg_id == tg_id).where(Basket.product_id == product_id)
         await session.execute(query)
         await session.commit()
+
+
+async def clear_cart(tg_id: int, ):
+    async with async_session() as session:
+        query = delete(Basket).where(Basket.tg_id == tg_id)
+        await session.execute(query)
+        await session.commit()
+
+
+async def add_to_exel(data_dict: dict):
+    str_address = ','.join(data_dict['order_info']['shipping_address'].values())
+    final_dict = {
+        'name': [data_dict['order_info']['name']],
+        'phone_number': [data_dict['order_info']['phone_number']],
+        'total_amount': [data_dict['total_amount']],
+        'currency': [data_dict['currency']],
+        'telegram_payment_charge_id': [data_dict['telegram_payment_charge_id']],
+        'provider_payment_charge_id': [data_dict['provider_payment_charge_id']],
+        'shipping_address': [str_address],
+    }
+
+    df = pd.DataFrame(final_dict)
+    df.to_excel(EXEL_FILENAME, sheet_name=SHEET_NAME, index=False)
+
