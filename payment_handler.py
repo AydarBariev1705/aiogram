@@ -1,10 +1,12 @@
 from aiogram import Bot
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, InlineKeyboardMarkup, \
+    InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from utils import clear_cart, add_to_exel
 from config import PAYMENT_TOKEN
 from handlers import HandlerState
-from keyboards import main_keyboard
+from keyboards import main_keyboard, to_main
 from aiogram.fsm.context import FSMContext
 
 
@@ -12,6 +14,14 @@ async def order(callback: CallbackQuery, state: FSMContext):
     # if PAYMENT_TOKEN.split(':')[1] == 'TEST':
     #     await callback.bot.send_message(callback.message.chat.id, 'pre_buy_demo_alert')
     await state.set_state(HandlerState.payment)
+    keyboard = InlineKeyboardBuilder()
+    keyboard.add(
+        InlineKeyboardButton(
+            text=f"Pay", pay=True
+            )
+    )
+    keyboard.add(to_main)
+
     await callback.bot.send_invoice(
         chat_id=HandlerState.tg_id,
         title='Order title',
@@ -33,7 +43,8 @@ async def order(callback: CallbackQuery, state: FSMContext):
         need_phone_number=True,
         need_shipping_address=True,
         request_timeout=15,
-        is_flexible=False
+        is_flexible=False,
+        reply_markup=keyboard.adjust(2).as_markup()
     )
 
 

@@ -11,14 +11,12 @@ from sqlalchemy import select
 from config import CHAT_ID, PAYMENT_TOKEN
 from database import async_session
 from keyboards import main_keyboard, categories_keyboard, subcategories_keyboard, products_keyboard, product_keyboard, \
-    cart_keyboard
+    cart_keyboard, faq_keyboard, to_main
 from models import Product
 from utils import set_or_create_basket, get_cart, get_product, del_product
 from utils import set_user
 
 router = Router()
-
-FAQ = 'FAQ'
 
 
 class HandlerState(StatesGroup):
@@ -74,7 +72,7 @@ async def callbacks_main(callback: CallbackQuery):
             await callback.message.answer('Cart is empty\n Lets start shopping!', reply_markup=main_keyboard())
 
     elif action == "faq":
-        await callback.message.answer(FAQ)
+        await callback.message.answer('FAQ', reply_markup=faq_keyboard())
 
     await callback.answer()
 
@@ -164,6 +162,7 @@ async def callbacks_delete_product(callback: CallbackQuery):
                 text=f"{prod.title}",
                 callback_data=f"del_product_{prod.id}")
         )
+    keyboard.add(to_main)
 
     await callback.message.answer(
         'Choose product to delete',
