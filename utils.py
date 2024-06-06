@@ -1,5 +1,8 @@
 import pandas as pd
+import datetime
 from aiogram.types import Message
+import os
+
 
 from config import EXEL_FILENAME, SHEET_NAME
 from database import async_session
@@ -96,17 +99,27 @@ async def clear_cart(tg_id: int, ):
 
 
 async def add_to_exel(data_dict: dict):
-    str_address = ','.join(data_dict['order_info']['shipping_address'].values())
+    # if not os.path.exists(f'{EXEL_FILENAME}'):
+    #
+    str_address = ', '.join(data_dict['order_info']['shipping_address'].values())
     final_dict = {
         'name': [data_dict['order_info']['name']],
         'phone_number': [data_dict['order_info']['phone_number']],
-        'total_amount': [data_dict['total_amount']],
+        'total_amount': [int(data_dict['total_amount']) // 100],
         'currency': [data_dict['currency']],
         'telegram_payment_charge_id': [data_dict['telegram_payment_charge_id']],
         'provider_payment_charge_id': [data_dict['provider_payment_charge_id']],
         'shipping_address': [str_address],
+        'date': datetime.datetime.now()
     }
+    df_new = pd.DataFrame(final_dict, index=[0])
+    if not os.path.exists(f'{EXEL_FILENAME}'):
+        df_old = pd.DataFrame({})
+    else:
+        df_old = pd.read_excel(EXEL_FILENAME)
+    df_final = pd.concat([df_old, df_new])
 
-    df = pd.DataFrame(final_dict)
-    df.to_excel(EXEL_FILENAME, sheet_name=SHEET_NAME, index=False)
+    df_final.to_excel(excel_writer=f'{EXEL_FILENAME}', sheet_name=SHEET_NAME, index=False)
+
+
 

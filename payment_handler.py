@@ -40,15 +40,11 @@ async def order(callback: CallbackQuery, state: FSMContext):
 async def process_pre_checkout_query(pre_checkout: PreCheckoutQuery, bot: Bot):
     print('Checking order')
     await bot.answer_pre_checkout_query(pre_checkout.id, ok=True)
-    # print(pre_checkout)
 
 
 async def successful_payment(message: Message, bot: Bot, state: FSMContext):
     msg = (f'Thank you for your order! Total cost {message.successful_payment.total_amount // 100} '
            f'{message.successful_payment.currency}')
-
-    for k, v in message.successful_payment.dict().items():
-        print(k, ':', v)
 
     await add_to_exel(message.successful_payment.dict())
     await clear_cart(message.from_user.id)
