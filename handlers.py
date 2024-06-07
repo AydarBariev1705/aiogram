@@ -97,9 +97,7 @@ async def callbacks_products(callback: CallbackQuery):
     action = callback.data.split("_")[1]
     keyboard, product, count = await product_keyboard(int(action))
     await callback.message.answer_photo(
-        photo=FSInputFile(
-            path=f'aiogramBariev/{product.image}',
-        ),
+        photo=product.image,
         caption=f"{product.description}\n\nprice: {product.price}",
         reply_markup=keyboard,
     )
@@ -117,21 +115,18 @@ async def callbacks_plus(callback: CallbackQuery):
             count=count + 1,
         )
         await callback.message.answer_photo(
-            photo=FSInputFile(
-                path=f'aiogramBariev/{product.image}',
-            ),
+            photo=product.image,
             caption=f"{product.description}\n\nprice: {product.price}",
             reply_markup=keyboard,
         )
+
     elif action[1] == 'minus':
         keyboard, product, count = await product_keyboard(
             prod_id=prod_id,
             count=count - 1,
         )
         await callback.message.answer_photo(
-            photo=FSInputFile(
-                path=f'aiogramBariev/{product.image}',
-            ),
+            photo=product.image,
             caption=f"{product.description}\n\nprice: {product.price}",
             reply_markup=keyboard,
         )

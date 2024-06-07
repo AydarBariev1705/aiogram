@@ -98,10 +98,15 @@ class Product(models.Model):
         blank=True,
         related_name='products',
     )
-    image = models.ImageField(
+    # image = models.ImageField(
+    #     null=True,
+    #     blank=True,
+    #     upload_to=images_directory_path,
+    # )
+    image = models.CharField(
         null=True,
         blank=True,
-        upload_to=images_directory_path,
+
     )
 
 

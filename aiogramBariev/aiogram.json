@@ -30,7 +30,7 @@
         "description": "Product1 Description",
         "price": "100.00",
         "subcategory": 1,
-        "image": "products/product_1/1.jpeg"
+        "image": "https://s8.hostingkartinok.com/uploads/images/2017/11/8d40816a2201d58671cfdb7dd2a0be5d.jpg"
     }
 },
 {
@@ -41,7 +41,7 @@
         "description": "Product2 Description",
         "price": "200.00",
         "subcategory": 1,
-        "image": "products/product_2/2.jpeg"
+        "image": "https://s8.hostingkartinok.com/uploads/images/2017/11/f6b410161133dc7abd812174be775558.jpg"
     }
 },
 {
@@ -52,7 +52,7 @@
         "description": "Product3 Description",
         "price": "300.00",
         "subcategory": 2,
-        "image": "products/product_3/3.jpeg"
+        "image": "https://s8.hostingkartinok.com/uploads/images/2017/11/02f2155f9b6615ade19654296f7f7778.jpg"
     }
 },
 {
@@ -63,7 +63,7 @@
         "description": "Product4 Description",
         "price": "400.00",
         "subcategory": 2,
-        "image": "products/product_4/4.jpeg"
+        "image": "https://s8.hostingkartinok.com/uploads/images/2017/11/7bd2dd5191d23808edc5854abe6c1a62.jpg"
     }
 }
 ]
