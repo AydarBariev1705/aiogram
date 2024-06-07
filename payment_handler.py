@@ -1,9 +1,8 @@
 from aiogram import Bot
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, InlineKeyboardMarkup, \
-    InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from utils import clear_cart, add_to_exel
+from utils import clear_cart, add_to_exel, get_cart, set_total_cost
 from config import PAYMENT_TOKEN
 from handlers import HandlerState
 from keyboards import main_keyboard, to_main
@@ -11,19 +10,19 @@ from aiogram.fsm.context import FSMContext
 
 
 async def order(callback: CallbackQuery, state: FSMContext):
-    # if PAYMENT_TOKEN.split(':')[1] == 'TEST':
-    #     await callback.bot.send_message(callback.message.chat.id, 'pre_buy_demo_alert')
     await state.set_state(HandlerState.payment)
     keyboard = InlineKeyboardBuilder()
     keyboard.add(
         InlineKeyboardButton(
             text=f"Pay", pay=True
-            )
+        )
     )
     keyboard.add(to_main)
+    cart = await get_cart(tg_id=callback.from_user.id,)
+    total_cost, msg = await set_total_cost(cart)
 
     await callback.bot.send_invoice(
-        chat_id=HandlerState.tg_id,
+        chat_id=callback.from_user.id,
         title='Order title',
         description='Order description',
         payload='Payment trough bot',
@@ -32,7 +31,7 @@ async def order(callback: CallbackQuery, state: FSMContext):
         prices=[
             LabeledPrice(
                 label='Total cost',
-                amount=HandlerState.total_cost * 100,
+                amount=total_cost * 100,
             )
         ],
         photo_url='https://ilogteh.ru/wp-content/uploads/2017/06/oplata-tovara-dlya-eksporta.jpg',
@@ -60,4 +59,4 @@ async def successful_payment(message: Message, bot: Bot, state: FSMContext):
     await add_to_exel(message.successful_payment.dict())
     await clear_cart(message.from_user.id)
     await bot.send_message(message.from_user.id, text=msg, reply_markup=main_keyboard())
-    await state.set_state(HandlerState.waiting_quantity)
+    await state.clear()

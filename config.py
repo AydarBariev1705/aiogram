@@ -17,8 +17,9 @@ DB_USER = os.environ.get("DB_USER")
 DB_PASS = os.environ.get("DB_PASS")
 
 FAQ = {
-    'Question 1': [1, 'Answer 1'],
-    'Question 2': [2, 'Answer 2'],
-    'Question 3': [3, 'Answer 3'],
-    'Question 4': [4, 'Answer 4'],
+    1: ['Question 1', 'Answer 1'],
+    2: ['Question 2', 'Answer 2'],
+    3: ['Question 3', 'Answer 3'],
+    4: ['Question 4', 'Answer 4'],
+
 }

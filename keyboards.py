@@ -2,12 +2,9 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config import FAQ
-from utils import get_categories, get_subcategories, get_products, get_product, get_cart
+from utils import get_categories, get_subcategories, get_products, get_product
 
 
-# from utils import get_categories, get_subcategories, get_products
-#
-#
 def main_keyboard():
     buttons = [
         [
@@ -21,8 +18,8 @@ def main_keyboard():
 
 
 to_main = InlineKeyboardButton(
-                text='To main menu',
-                callback_data='to_main')
+    text='To main menu',
+    callback_data='to_main')
 
 
 async def categories_keyboard():
@@ -41,12 +38,25 @@ async def categories_keyboard():
 
 def faq_keyboard():
     keyboard = InlineKeyboardBuilder()
-    for q, a in FAQ.items():
+    for number, data in FAQ.items():
         keyboard.add(
             InlineKeyboardButton(
-                text=f"{q}",
-                callback_data=f"faq_{a[0]}")
+                text=f"{data[0]}",
+                callback_data=f"faq_{number}")
         )
+    keyboard.add(to_main)
+    return keyboard.adjust(1).as_markup()
+
+
+def faq_answer_keyboard():
+    keyboard = InlineKeyboardBuilder()
+
+    keyboard.add(
+        InlineKeyboardButton(
+            text=f"Another question",
+            callback_data=f"bot_faq")
+    )
+
     keyboard.add(to_main)
     return keyboard.adjust(2).as_markup()
 
@@ -78,17 +88,21 @@ async def products_keyboard(subcat_id: int):
     return keyboard.adjust(2).as_markup()
 
 
-async def product_keyboard(prod_id: int):
+async def product_keyboard(prod_id: int, count: int = 1):
     product = await get_product(prod_id)
-    keyboard = InlineKeyboardBuilder()
-    keyboard.add(
-        InlineKeyboardButton(
-            text=f"Add to cart",
-            callback_data=f"product_{product.id}")
-    )
-    keyboard.add(to_main)
+    buttons = [
+        [
+            InlineKeyboardButton(text="+1", callback_data=f"btn_plus_{count}_{prod_id}"),
+            InlineKeyboardButton(text=f"count: {count}", callback_data="do_not_handle"),
+            InlineKeyboardButton(text="-1", callback_data=f"btn_minus_{count}_{prod_id}")
+        ],
+        [InlineKeyboardButton(text="Accept", callback_data=f"accept_{count}_{prod_id}")],
+        [to_main],
 
-    return keyboard.adjust(1).as_markup(), product
+    ]
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return keyboard, product, count
 
 
 async def cart_keyboard():
@@ -104,15 +118,4 @@ async def cart_keyboard():
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
 
     return keyboard
-    # cart = await get_cart(tg_id)
-    #     cart_dict = {}
-    #     if cart:
-    #         keyboard = InlineKeyboardBuilder()
-    #         for obj in cart:
-    #             print(obj.product_id)
-    #             print(obj.quantity)
-    #             product = await get_product(obj.product_id)
-    #             cart_dict[product.title] = {'quantity': obj.quantity, 'total_summ': obj.quantity*product.price}
 
-# async def cart_keyboard(tg_id: int):
-#

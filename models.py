@@ -1,5 +1,8 @@
-from sqlalchemy import ForeignKey, Integer, String, Numeric, Text
+from typing import List
+
+from sqlalchemy import ForeignKey, Integer, String, Numeric, Text, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
+import datetime
 
 from database import Base
 
@@ -104,3 +107,25 @@ class Basket(Base):
         ForeignKey("aiogramapp_product.id")
     )
     quantity: Mapped[str] = mapped_column(Integer, default=1, nullable=False)
+
+
+class Newsletter(Base):
+    """
+    Модель рассылки
+    """
+    __tablename__ = "aiogramapp_newsletter"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        autoincrement=True,
+        index=True,
+    )
+    message: Mapped[str] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    tg_user_list: Mapped[List] = mapped_column(ARRAY(Integer))
+
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        default=datetime.datetime.utcnow, nullable=True
+    )

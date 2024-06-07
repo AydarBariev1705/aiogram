@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 
@@ -132,3 +133,36 @@ class Basket(models.Model):
         null=False,
     )
 
+
+class Newsletter(models.Model):
+    """
+    Модель рассылки
+    """
+    message = models.TextField(
+        null=False,
+        blank=True,
+    )
+    tg_user_list = ArrayField(models.BigIntegerField(null=True, blank=True), blank=True, )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Totalcost(models.Model):
+    total_cost = models.IntegerField(
+        default=1,
+        null=False,
+    )
+    tg_id = models.BigIntegerField(
+        null=False,
+        default=1,
+    )
+
+
+class Temporary(models.Model):
+    product_id = models.IntegerField(
+        default=1,
+        null=False,
+    )
+    tg_id = models.BigIntegerField(
+        null=False,
+        default=1,
+    )

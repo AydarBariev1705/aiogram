@@ -3,19 +3,24 @@ import datetime
 from aiogram.types import Message
 import os
 
-
 from config import EXEL_FILENAME, SHEET_NAME
 from database import async_session
 from sqlalchemy import select, delete
-from models import Category, Subcategory, Product, Tguser, Basket
+from models import Category, Subcategory, Product, Tguser, Basket, Newsletter
 
 
-async def set_user(tg_id):
+async def set_user(tg_id: int):
     async with async_session() as session:
         user = await session.scalar(select(Tguser).where(Tguser.tg_id == tg_id))
         if not user:
             session.add(Tguser(tg_id=tg_id))
             await session.commit()
+
+
+async def create_newsletter(tg_user_list: list, message: str):
+    async with async_session() as session:
+        session.add(Newsletter(tg_user_list=tg_user_list, message=message))
+        await session.commit()
 
 
 async def add_to_basket(tg_id: int, product_id: int):
@@ -98,9 +103,20 @@ async def clear_cart(tg_id: int, ):
         await session.commit()
 
 
+async def set_total_cost(cart):
+    total_cost = 0
+    message_string = ''
+    for obj in cart:
+        product = await get_product(obj.product_id)
+        total_summ_for_product = obj.quantity * product.price
+        total_cost += total_summ_for_product
+        message_string += (f"*{product.title}*\n"
+                           f"quantity in cart: {obj.quantity}\n"
+                           f"price: {obj.quantity * product.price}\n")
+    return total_cost, message_string
+
+
 async def add_to_exel(data_dict: dict):
-    # if not os.path.exists(f'{EXEL_FILENAME}'):
-    #
     str_address = ', '.join(data_dict['order_info']['shipping_address'].values())
     final_dict = {
         'name': [data_dict['order_info']['name']],
@@ -120,6 +136,3 @@ async def add_to_exel(data_dict: dict):
     df_final = pd.concat([df_old, df_new])
 
     df_final.to_excel(excel_writer=f'{EXEL_FILENAME}', sheet_name=SHEET_NAME, index=False)
-
-
-
