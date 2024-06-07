@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-jq^hyug&f2ziz1l09(p)f!6cti=^4!t#^s*bgb+(=k42b5p&l2"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1']
 
 # Application definition
 
@@ -77,16 +79,15 @@ DATABASES = {
 
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
 
-        'NAME': 'postgres',
+        'NAME': os.environ.get("DB_NAME"),
 
-        'USER': 'postgres',
+        'USER': os.environ.get("DB_USER"),
 
-        'PASSWORD': 'postgres',
+        'PASSWORD': os.environ.get("DB_PASS"),
 
-        'HOST': '127.0.0.1',
+        'HOST': os.environ.get("DB_HOST"),
 
-        'PORT': '5432',
-
+        'PORT': os.environ.get("DB_PORT"),
     }
 
 }

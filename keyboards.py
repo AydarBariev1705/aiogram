@@ -42,7 +42,7 @@ def faq_keyboard():
         keyboard.add(
             InlineKeyboardButton(
                 text=f"{data[0]}",
-                callback_data=f"faq_{number}")
+                callback_data=f"faq_{number}"),
         )
     keyboard.add(to_main)
     return keyboard.adjust(1).as_markup()
@@ -54,7 +54,7 @@ def faq_answer_keyboard():
     keyboard.add(
         InlineKeyboardButton(
             text=f"Another question",
-            callback_data=f"bot_faq")
+            callback_data=f"bot_faq"),
     )
 
     keyboard.add(to_main)
@@ -68,7 +68,7 @@ async def subcategories_keyboard(cat_id: int):
         keyboard.add(
             InlineKeyboardButton(
                 text=f"{subcategory.title}",
-                callback_data=f"subcategory_{subcategory.id}")
+                callback_data=f"subcategory_{subcategory.id}"),
         )
     keyboard.add(to_main)
 
@@ -82,7 +82,7 @@ async def products_keyboard(subcat_id: int):
         keyboard.add(
             InlineKeyboardButton(
                 text=f"{product.title}",
-                callback_data=f"products_{product.id}")
+                callback_data=f"products_{product.id}"),
         )
     keyboard.add(to_main)
     return keyboard.adjust(2).as_markup()
@@ -98,7 +98,6 @@ async def product_keyboard(prod_id: int, count: int = 1):
         ],
         [InlineKeyboardButton(text="Accept", callback_data=f"accept_{count}_{prod_id}")],
         [to_main],
-
     ]
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
@@ -112,9 +111,7 @@ async def cart_keyboard():
             InlineKeyboardButton(text="Delete product from cart", callback_data="delete_products")
         ],
         [to_main],
-
     ]
-
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
 
     return keyboard

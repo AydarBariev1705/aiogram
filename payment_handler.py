@@ -4,7 +4,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from utils import clear_cart, add_to_exel, get_cart, set_total_cost
 from config import PAYMENT_TOKEN
-from handlers import HandlerState
+from states import HandlerState
 from keyboards import main_keyboard, to_main
 from aiogram.fsm.context import FSMContext
 

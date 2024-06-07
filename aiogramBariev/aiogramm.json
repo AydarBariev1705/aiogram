@@ -1,0 +1,69 @@
+[
+{
+    "model": "aiogramapp.category",
+    "pk": 1,
+    "fields": {
+        "title": "Cat1"
+    }
+},
+{
+    "model": "aiogramapp.subcategory",
+    "pk": 1,
+    "fields": {
+        "title": "Subcategory1",
+        "parent": 1
+    }
+},
+{
+    "model": "aiogramapp.subcategory",
+    "pk": 2,
+    "fields": {
+        "title": "Subcategory2",
+        "parent": 1
+    }
+},
+{
+    "model": "aiogramapp.product",
+    "pk": 1,
+    "fields": {
+        "title": "Product1",
+        "description": "Product1 Description",
+        "price": "100.00",
+        "subcategory": 1,
+        "image": "products/product_1/1.jpeg"
+    }
+},
+{
+    "model": "aiogramapp.product",
+    "pk": 2,
+    "fields": {
+        "title": "Product2",
+        "description": "Product2 Description",
+        "price": "200.00",
+        "subcategory": 1,
+        "image": "products/product_2/2.jpeg"
+    }
+},
+{
+    "model": "aiogramapp.product",
+    "pk": 3,
+    "fields": {
+        "title": "Product3",
+        "description": "Product3 Description",
+        "price": "300.00",
+        "subcategory": 2,
+        "image": "products/product_3/3.jpeg"
+    }
+},
+{
+    "model": "aiogramapp.product",
+    "pk": 4,
+    "fields": {
+        "title": "Product4",
+        "description": "Product4 Description",
+        "price": "400.00",
+        "subcategory": 2,
+        "image": "products/product_4/4.jpeg"
+    }
+}
+]

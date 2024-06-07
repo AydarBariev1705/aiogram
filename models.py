@@ -46,7 +46,7 @@ class Subcategory(Base):
         index=True,
     )
     parent_id: Mapped[int] = mapped_column(
-        ForeignKey("aiogramapp_category.id")
+        ForeignKey("aiogramapp_category.id"),
     )
 
     def __str__(self) -> str:
@@ -70,10 +70,19 @@ class Product(Base):
         index=True,
     )
 
-    description: Mapped[str] = mapped_column(Text, nullable=True)
-    price = mapped_column(Numeric(8, 2), default=1, nullable=False)
+    description: Mapped[str] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    price = mapped_column(
+        Numeric(8, 2),
+        default=1,
+        nullable=False,
+    )
 
-    subcategory_id: Mapped[int] = mapped_column(ForeignKey("aiogramapp_subcategory.id"))
+    subcategory_id: Mapped[int] = mapped_column(
+        ForeignKey("aiogramapp_subcategory.id"),
+    )
 
     image: Mapped[str] = mapped_column(String, nullable=True)
 
@@ -82,13 +91,18 @@ class Product(Base):
 
 
 class Tguser(Base):
+    """
+    Модель пользователя
+    """
     __tablename__ = "aiogramapp_tguser"
     id: Mapped[int] = mapped_column(
         primary_key=True,
         autoincrement=True,
         index=True,
     )
-    tg_id: Mapped[str] = mapped_column(Integer, nullable=False)
+    tg_id: Mapped[str] = mapped_column(
+        Integer, nullable=False,
+    )
 
 
 class Basket(Base):
@@ -102,11 +116,16 @@ class Basket(Base):
         index=True,
     )
     tg_id: Mapped[int] = mapped_column(
-        Integer)
-    product_id: Mapped[int] = mapped_column(
-        ForeignKey("aiogramapp_product.id")
+        Integer,
     )
-    quantity: Mapped[str] = mapped_column(Integer, default=1, nullable=False)
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("aiogramapp_product.id"),
+    )
+    quantity: Mapped[str] = mapped_column(
+        Integer,
+        default=1,
+        nullable=False,
+    )
 
 
 class Newsletter(Base):
@@ -127,5 +146,7 @@ class Newsletter(Base):
     tg_user_list: Mapped[List] = mapped_column(ARRAY(Integer))
 
     created_at: Mapped[datetime.datetime] = mapped_column(
-        default=datetime.datetime.utcnow, nullable=True
+        default=datetime.datetime.utcnow,
+        nullable=True,
+
     )

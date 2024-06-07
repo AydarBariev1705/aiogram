@@ -1,6 +1,5 @@
 import pandas as pd
 import datetime
-from aiogram.types import Message
 import os
 
 from config import EXEL_FILENAME, SHEET_NAME
@@ -9,7 +8,8 @@ from sqlalchemy import select, delete
 from models import Category, Subcategory, Product, Tguser, Basket, Newsletter
 
 
-async def set_user(tg_id: int):
+async def set_user(tg_id: int) -> None:
+    """Функция для записи пользователя в БД"""
     async with async_session() as session:
         user = await session.scalar(select(Tguser).where(Tguser.tg_id == tg_id))
         if not user:
@@ -17,55 +17,50 @@ async def set_user(tg_id: int):
             await session.commit()
 
 
-async def create_newsletter(tg_user_list: list, message: str):
+async def create_newsletter(tg_user_list: list, message: str) -> None:
+    """Функция для записи рассылки в БД"""
     async with async_session() as session:
         session.add(Newsletter(tg_user_list=tg_user_list, message=message))
         await session.commit()
 
 
-async def add_to_basket(tg_id: int, product_id: int):
-    async with async_session() as session:
-        basket = await session.scalar(select(Basket).where(
-            Basket.tg_user_id == tg_id,
-            Basket.product_id == product_id,
-        )
-        )
-        if not basket:
-            session.add(Basket(tg_user_id=tg_id, product_id=product_id))
-            await session.commit()
-
-
 async def get_users():
+    """Функция для извлечения данных о пользователях"""
     async with async_session() as session:
         users = await session.scalars(select(Tguser))
         return users
 
 
 async def get_categories():
+    """Функция для извлечения данных о категориях"""
     async with async_session() as session:
         categories = await session.scalars(select(Category))
     return categories
 
 
 async def get_subcategories(cat_id: int):
+    """Функция для извлечения данных о подкатегориях"""
     async with async_session() as session:
         subcategories = await session.scalars(select(Subcategory).where(Subcategory.parent_id == cat_id))
     return subcategories
 
 
 async def get_products(subcat_id: int):
+    """Функция для извлечения данных о продуктах"""
     async with async_session() as session:
         products = await session.scalars(select(Product).where(Product.subcategory_id == subcat_id))
     return products
 
 
 async def get_product(prod_id: int):
+    """Функция для извлечения данных о продукте"""
     async with async_session() as session:
         product = await session.scalar(select(Product).where(Product.id == prod_id))
     return product
 
 
 async def set_or_create_basket(tg_id: int, product_id: int, quantity: int):
+    """Функция для изменения или создания Корзины"""
     async with async_session() as session:
         basket = await session.scalar(select(Basket).where(
             Basket.tg_id == tg_id).where(
@@ -81,6 +76,7 @@ async def set_or_create_basket(tg_id: int, product_id: int, quantity: int):
 
 
 async def get_cart(tg_id: int):
+    """Функция для формирования данных о корзине пользователя"""
     async with async_session() as session:
         cart = await session.scalars(select(Basket).where(Basket.tg_id == tg_id))
         if cart:
@@ -90,6 +86,7 @@ async def get_cart(tg_id: int):
 
 
 async def del_product(tg_id: int, product_id):
+    """Функция для удаления товара из корзины"""
     async with async_session() as session:
         query = delete(Basket).where(Basket.tg_id == tg_id).where(Basket.product_id == product_id)
         await session.execute(query)
@@ -97,6 +94,7 @@ async def del_product(tg_id: int, product_id):
 
 
 async def clear_cart(tg_id: int, ):
+    """Функция для удаления всех товаров из корзины"""
     async with async_session() as session:
         query = delete(Basket).where(Basket.tg_id == tg_id)
         await session.execute(query)
@@ -104,6 +102,7 @@ async def clear_cart(tg_id: int, ):
 
 
 async def set_total_cost(cart):
+    """Функция для уточнения полной стоимости товаров в корзине"""
     total_cost = 0
     message_string = ''
     for obj in cart:
@@ -117,6 +116,7 @@ async def set_total_cost(cart):
 
 
 async def add_to_exel(data_dict: dict):
+    """Функция для записи о заказе в EXEL файл"""
     str_address = ', '.join(data_dict['order_info']['shipping_address'].values())
     final_dict = {
         'name': [data_dict['order_info']['name']],
